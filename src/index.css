@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  /* Primary - Used for main actions, buttons, links */
+  --color-primary-50: #0284c7;
+  /* Brighter for dark mode */
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #38bdf8;
+
+  /* Neutral - Used for text, backgrounds, borders */
+  --color-neutral-50: #0f172a;
+  /* Dark background */
+  --color-neutral-100: #1e293b;
+  /* Card background */
+  --color-neutral-200: #334155;
+  /* Borders */
+  --color-neutral-500: #94a3b8;
+  /* Muted text */
+  --color-neutral-700: #cbd5e1;
+  /* Secondary text */
+  --color-neutral-900: #f8fafc;
+  /* Primary text */
+
+  /* Success - Used for positive actions/states */
+  --color-success-50: #064e3b;
+  /* Dark success background */
+  --color-success-500: #22c55e;
+
+  /* Warning - Used for cautionary messages */
+  --color-warning-50: #451a03;
+  /* Dark warning background */
+  --color-warning-500: #f59e0b;
+
+  /* Error - Used for error states */
+  --color-error-50: #450a0a;
+  /* Dark error background */
+  --color-error-500: #ef4444;
+}
+
+body {
+  @apply bg-neutral-50 text-neutral-900;
+}
+
+.cm-editor {
+  background: transparent !important;
+}
+
+.cm-gutters {
+  background: transparent !important;
+  border: none !important;
+}
