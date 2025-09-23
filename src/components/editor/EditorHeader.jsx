@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Text } from '../ui/Typography';
 
-export function EditorHeader({ fileName, language, onRun }) {
+export function EditorHeader({ fileName, language, onRun, onSave }) {
   const navigate = useNavigate();
 
 
@@ -19,13 +19,18 @@ export function EditorHeader({ fileName, language, onRun }) {
           Home
         </Button>
       </div>
-      <Button
-        variant="primary"
-        size="sm"
-        onClick={onRun}
-      >
-        Run Code
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button variant='primary' size='sm' onClick={onSave}>
+          Save
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={onRun}
+        >
+          Run Code
+        </Button>
+      </div>
     </div>
   );
 }

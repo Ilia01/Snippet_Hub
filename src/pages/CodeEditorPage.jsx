@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { SandboxedCodeRunner } from '../components/code-runner/SandboxedCodeRunner';
 import { EditorHeader } from '../components/editor/EditorHeader';
 import { EditorPane } from '../components/editor/EditorPane';
@@ -8,7 +8,7 @@ import { StatusBar } from '../components/editor/StatusBar';
 import { snippets } from '../data/snippets';
 import { useNotification } from '../hooks/useNotification';
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import { javascript, typescriptLanguage } from '@codemirror/lang-javascript';
 import { customTheme } from '../components/editor/EditorTheme';
 
 export function CodeEditorPage() {
@@ -18,13 +18,20 @@ export function CodeEditorPage() {
   const [status, setStatus] = useState('Ready');
   const notify = useNotification();
   const runnerRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Find the snippet
   const snippet = snippets.find(s => s.id === snippetId);
 
+  useEffect(() => {
+    if (!snippet) {
+      navigate('/not-found');
+    } else {
+      setCode(snippet.code);
+    }
+  }, [snippet, navigate]);
+
   if (!snippet) {
-    notify.error('Snippet not found');
-    return <Navigate to="/" replace />;
+    return null; // Or a loading spinner
   }
 
   const handleCodeChange = (value) => {
@@ -32,8 +39,12 @@ export function CodeEditorPage() {
   };
 
   const handleRunCode = () => {
-    // Call the runner's handleRunCode method
     runnerRef.current?.handleRunCode();
+  };
+
+  const handleSaveCode = () => {
+    snippet.code = code;
+    notify.success('Code saved Successfully');
   };
 
   const getFileExtension = (language) => {
@@ -61,23 +72,25 @@ export function CodeEditorPage() {
     }
   };
 
+  // Render the component only after the snippet is guaranteed to exist.
   return (
     <div className="flex h-screen flex-col">
       <EditorHeader
         fileName={`${snippet.title.replaceAll(' ', '_')}.${getFileExtension(snippet.language)}`}
         language={snippet.language}
         onRun={handleRunCode}
+        onSave={handleSaveCode}
       />
 
       <div className="flex flex-1 overflow-hidden">
         <EditorPane>
           <div className="h-full w-full">
             <CodeMirror
-              value={code || snippet.code}
+              value={code} // Use the state variable for the CodeMirror value.
               height="100%"
               width="100%"
               theme={customTheme}
-              extensions={[javascript()]}
+              extensions={[javascript({ jsx: true }), typescriptLanguage]}
               onChange={handleCodeChange}
               className="h-full overflow-hidden"
               basicSetup={{
@@ -90,7 +103,7 @@ export function CodeEditorPage() {
           </div>
           <SandboxedCodeRunner
             ref={runnerRef}
-            code={code || snippet.code}
+            code={code} // Pass the state variable to the runner.
             onOutput={setOutput}
             onStatusChange={setStatus}
           />
