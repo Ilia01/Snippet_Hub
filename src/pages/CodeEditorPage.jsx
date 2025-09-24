@@ -32,7 +32,7 @@ export function CodeEditorPage() {
     const loadCode = async () => {
       const savedCode = await getSavedSnippetCode(snippet.id);
 
-      if (code) {
+      if (savedCode) {
         setCode(savedCode);
       } else {
         setCode(snippet.code);
