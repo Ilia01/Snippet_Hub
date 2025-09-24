@@ -1,8 +1,34 @@
+
 import { Card } from '../Card';
 import { Button } from '../Button';
 import { Text } from '../Typography';
 import { Highlight } from 'prism-react-renderer';
 import { useNavigate } from 'react-router-dom';
+
+// Helper function to render the description with auto-detected links
+function renderDescription(description) {
+  if (!description) return null;
+
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = description.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
 
 export function SnippetCard({ snippet }) {
   const { title, description, code, language, tags, id } = snippet;
@@ -34,7 +60,7 @@ export function SnippetCard({ snippet }) {
 
       {/* Code Preview */}
       <div className="flex-1 overflow-x-auto bg-neutral-100 p-4 font-mono">
-        <div className="min-w-max"> {/* This ensures code doesn't wrap */}
+        <div className="min-w-max">
           <Highlight code={code} language={language}>
             {({ className, style, tokens, getLineProps, getTokenProps }) => (
               <pre
@@ -64,7 +90,7 @@ export function SnippetCard({ snippet }) {
       {/* Footer */}
       <div className="border-t border-neutral-200 p-4">
         <Text variant="secondary" className="line-clamp-2 mb-3">
-          {description}
+          {renderDescription(description)}
         </Text>
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
