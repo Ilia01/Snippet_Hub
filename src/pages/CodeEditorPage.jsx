@@ -11,6 +11,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { javascript, typescriptLanguage } from '@codemirror/lang-javascript';
 import { customTheme } from '../components/editor/EditorTheme';
 import { getSavedSnippetCode, saveSnippet } from '../lib/database';
+import { getFileExtension } from '../lib/getFileExtension';
 
 export function CodeEditorPage() {
   const { snippetId } = useParams();
@@ -58,32 +59,8 @@ export function CodeEditorPage() {
     notify.success('Code saved Successfully!');
   };
 
-  const getFileExtension = (language) => {
-    switch (language.toLowerCase()) {
-      case 'javascript':
-        return 'js';
-      case 'typescript':
-        return 'ts';
-      case 'python':
-        return 'py';
-      case 'java':
-        return 'java';
-      case 'c++':
-        return 'cpp';
-      case 'c':
-        return 'c';
-      case 'html':
-        return 'html';
-      case 'css':
-        return 'css';
-      case 'json':
-        return 'json';
-      default:
-        return 'txt';
-    }
-  };
 
-  // Render the component only after the snippet is guaranteed to exist.
+
   return (
     <div className="flex h-screen flex-col">
       <EditorHeader
@@ -97,7 +74,7 @@ export function CodeEditorPage() {
         <EditorPane>
           <div className="h-full w-full">
             <CodeMirror
-              value={code} // Use the state variable for the CodeMirror value.
+              value={code}
               height="100%"
               width="100%"
               theme={customTheme}
@@ -114,7 +91,7 @@ export function CodeEditorPage() {
           </div>
           <SandboxedCodeRunner
             ref={runnerRef}
-            code={code} // Pass the state variable to the runner.
+            code={code}
             onOutput={setOutput}
             onStatusChange={setStatus}
           />
