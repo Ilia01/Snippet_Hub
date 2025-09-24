@@ -1,39 +1,5 @@
 import { forwardRef, useRef, useCallback, useImperativeHandle } from 'react';
-
-// Function to format complex data structures into a single string
-const formatForOutput = (item, indent = 0) => {
-  const indentation = '  '.repeat(indent);
-  const nextIndentation = '  '.repeat(indent + 1);
-
-  if (item === null) {
-    return 'null';
-  }
-
-  if (Array.isArray(item)) {
-    if (item.length === 0) return '[]';
-    const contents = item
-      .map(i => formatForOutput(i, indent + 1))
-      .join(',\n' + nextIndentation);
-    return `[\n${nextIndentation}${contents}\n${indentation}]`;
-  }
-
-  if (typeof item === 'object') {
-    const keys = Object.keys(item);
-    if (keys.length === 0) return '{}';
-
-    const contents = keys
-      .map(key => `${key}: ${formatForOutput(item[key], indent + 1)}`)
-      .join(',\n' + nextIndentation);
-    return `{\n${nextIndentation}${contents}\n${indentation}}`;
-  }
-
-  if (typeof item === 'string') return `${item}`;
-  if (typeof item === 'function') return `[Function: ${item.name || '(anonymous)'}]`;
-
-  return String(item);
-};
-
-
+import { formatForOutput } from "../../lib/formatOutput.js"
 
 export const SandboxedCodeRunner = forwardRef(function SandboxedCodeRunner({
   code,
