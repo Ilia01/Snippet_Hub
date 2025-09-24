@@ -10,6 +10,7 @@ import { useNotification } from '../hooks/useNotification';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript, typescriptLanguage } from '@codemirror/lang-javascript';
 import { customTheme } from '../components/editor/EditorTheme';
+import { getSavedSnippetCode, saveSnippet } from '../lib/database';
 
 export function CodeEditorPage() {
   const { snippetId } = useParams();
@@ -20,14 +21,24 @@ export function CodeEditorPage() {
   const runnerRef = useRef(null);
   const navigate = useNavigate();
 
-  const snippet = snippets.find(s => s.id === snippetId);
+  let snippet = snippets.find(s => s.id === snippetId);
 
   useEffect(() => {
     if (!snippet) {
       navigate('/not-found');
-    } else {
-      setCode(snippet.code);
+      return;
     }
+
+    const loadCode = async () => {
+      const savedCode = await getSavedSnippetCode(snippet.id);
+
+      if (code) {
+        setCode(savedCode);
+      } else {
+        setCode(snippet.code);
+      }
+    }
+    loadCode();
   }, [snippet, navigate]);
 
   if (!snippet) {
@@ -42,9 +53,9 @@ export function CodeEditorPage() {
     runnerRef.current?.handleRunCode();
   };
 
-  const handleSaveCode = () => {
-    snippet.code = code;
-    notify.success('Code saved Successfully');
+  const handleSaveCode = async () => {
+    await saveSnippet(snippet.id, code);
+    notify.success('Code saved Successfully!');
   };
 
   const getFileExtension = (language) => {
