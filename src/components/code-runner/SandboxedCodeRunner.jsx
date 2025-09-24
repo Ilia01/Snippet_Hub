@@ -1,5 +1,40 @@
 import { forwardRef, useRef, useCallback, useImperativeHandle } from 'react';
 
+// Function to format complex data structures into a single string
+const formatForOutput = (item, indent = 0) => {
+  const indentation = '  '.repeat(indent);
+  const nextIndentation = '  '.repeat(indent + 1);
+
+  if (item === null) {
+    return 'null';
+  }
+
+  if (Array.isArray(item)) {
+    if (item.length === 0) return '[]';
+    const contents = item
+      .map(i => formatForOutput(i, indent + 1))
+      .join(',\n' + nextIndentation);
+    return `[\n${nextIndentation}${contents}\n${indentation}]`;
+  }
+
+  if (typeof item === 'object') {
+    const keys = Object.keys(item);
+    if (keys.length === 0) return '{}';
+
+    const contents = keys
+      .map(key => `${key}: ${formatForOutput(item[key], indent + 1)}`)
+      .join(',\n' + nextIndentation);
+    return `{\n${nextIndentation}${contents}\n${indentation}}`;
+  }
+
+  if (typeof item === 'string') return `${item}`;
+  if (typeof item === 'function') return `[Function: ${item.name || '(anonymous)'}]`;
+
+  return String(item);
+};
+
+
+
 export const SandboxedCodeRunner = forwardRef(function SandboxedCodeRunner({
   code,
   onOutput,
@@ -8,41 +43,44 @@ export const SandboxedCodeRunner = forwardRef(function SandboxedCodeRunner({
   const iframeRef = useRef(null);
 
   const handleRunCode = useCallback(() => {
-    onOutput([]); // Clear previous output
-    onStatusChange('Running...'); // Update status
+    onOutput([]);
+    onStatusChange('Running...');
 
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    // Create an empty, sandboxed iframe
     iframe.src = 'about:blank';
     iframe.sandbox = 'allow-scripts allow-same-origin';
 
-    iframe.onload = () => {
+    iframe.onload = async () => {
       const sandboxWindow = iframe.contentWindow;
+      if (!sandboxWindow) return;
 
-      // Intercept console.log and capture output
       const consoleOutput = [];
       sandboxWindow.console.log = (...args) => {
-        consoleOutput.push(args.join(' '));
-        onOutput(consoleOutput); // Update output in real-time
+        const formattedLine = args
+          .map(arg => formatForOutput(arg))
+          .join(' ');
+
+        consoleOutput.push(formattedLine);
+        onOutput([...consoleOutput]);
+
+        console.log(...args);
       };
 
       try {
-        // Execute the code inside the sandboxed iframe
-        sandboxWindow.eval(code);
+        await sandboxWindow.eval(code);
         if (consoleOutput.length === 0) {
-          onOutput(['No output']); // Handle case with no console.log calls
+          onOutput(['No output']);
         }
-        onStatusChange('Ready'); // Update status on completion
+        onStatusChange('Ready');
       } catch (error) {
         onOutput(['Error: ' + error.toString()]);
-        onStatusChange('Error'); // Update status on error
+        onStatusChange('Error');
       }
     };
   }, [code, onOutput, onStatusChange]);
 
-  // Expose handleRunCode to parent
   useImperativeHandle(ref, () => ({
     handleRunCode
   }));

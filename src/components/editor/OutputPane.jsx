@@ -11,10 +11,11 @@ export function OutputPane({ output }) {
       </div>
       <div className="p-4">
         <Card className="font-mono text-sm">
-          {output || '> Console output will appear here...'}
+          <pre className="whitespace-pre-wrap">
+            {output || 'No output yet.'}
+          </pre>
         </Card>
       </div>
     </div>
   );
 }
-
